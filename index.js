@@ -3,7 +3,15 @@ const PORT = process.env.PORT;
 const BASE_URL = process.env.BASE_URL;
 const express = require("express");
 const app = express();
-require("dotenv").config();
+const { initDatabase } = require("./database/database.js");
+
+initDatabase()
+  .then(() => {
+    console.log("Database initialized");
+  })
+  .catch((err) => {
+    console.error("Failed to initialize database:", err);
+  });
 
 const userRoutes = require("./routes/userRoutes");
 const channelRoutes = require("./routes/channelRoutes");
