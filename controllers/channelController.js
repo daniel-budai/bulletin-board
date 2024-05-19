@@ -44,4 +44,21 @@ const deleteChannel = (req, res) => {
   });
 };
 
-module.exports = { createChannel, getChannels, updateChannel, deleteChannel };
+const subscribeToChannel = (req, res) => {
+  const { userId, channelId } = req.body;
+  const sql = `INSERT INTO subscription (userId, channelId) VALUES (?, ?)`;
+  db.run(sql, [userId, channelId], function (err) {
+    if (err) {
+      return console.error(err.message);
+    }
+    res.status(200).json({ message: "Subscribed to channel." });
+  });
+};
+
+module.exports = {
+  createChannel,
+  getChannels,
+  updateChannel,
+  deleteChannel,
+  subscribeToChannel,
+};

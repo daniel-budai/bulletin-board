@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const messageController = require("../controllers/messageController");
 
-router.get("/", (req, res) => {});
+router.get("/user/:userId", messageController.getAllMessagesByUserId);
 
-router.post("/", (req, res) => {});
+router.post("/", messageController.postMessage);
 
-router.put("/", (req, res) => {});
+router.put("/update", messageController.updateMessage);
 
-router.delete("/", (req, res) => {});
+router.delete("/delete", messageController.deleteMessage);
 
 module.exports = router;
