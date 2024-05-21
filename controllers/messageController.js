@@ -3,8 +3,6 @@ const db = new sqlite3.Database("./database.db");
 
 const postMessage = (req, res) => {
   const { userId, channelId, message } = req.body;
-
-  // Check if the subscription exists or if the user is the owner of the channel
   const sql = `
   SELECT userId, channelId FROM subscription WHERE userId = ? AND channelId = ? 
   UNION 
@@ -14,20 +12,24 @@ const postMessage = (req, res) => {
     if (err) {
       return console.error(err.message);
     }
-    // If the subscription does not exist and the user is not the owner of the channel, return an error message
     if (!row) {
       return res.status(400).json({
         error: "Du måste prenumerera på kanalen eller vara ägaren först.",
       });
     }
 
-    // If the subscription exists or the user is the owner of the channel, post the message
     const sql = `INSERT INTO message (userId, channelId, Title) VALUES (?, ?, ?)`;
     db.run(sql, [userId, channelId, message], function (err) {
       if (err) {
         return console.error(err.message);
       }
-      res.status(200).json({ message: "Meddelandet har postats." });
+      const sql = `INSERT INTO message_channel (messageId, channelId) VALUES (?, ?)`;
+      db.run(sql, [this.lastID, channelId], function (err) {
+        if (err) {
+          return console.error(err.message);
+        }
+        res.status(200).json({ message: "Meddelandet har postats." });
+      });
     });
   });
 };
@@ -44,7 +46,6 @@ const updateMessage = (req, res) => {
   });
 };
 
-// Get all messages by a user
 const getAllMessagesByUserId = (req, res) => {
   const { userId } = req.params;
 
@@ -57,7 +58,6 @@ const getAllMessagesByUserId = (req, res) => {
   });
 };
 
-// Delete a message
 const deleteMessage = (req, res) => {
   const { messageId } = req.body;
 
@@ -70,9 +70,21 @@ const deleteMessage = (req, res) => {
   });
 };
 
+const getMessagesFromChannel = (req, res) => {
+  const { channelId } = req.params;
+  const sql = `SELECT * FROM message INNER JOIN message_channel ON message.MessageId = message_channel.messageId WHERE message_channel.channelId = ?`;
+  db.all(sql, [channelId], (err, rows) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    res.status(200).json(rows);
+  });
+};
+
 module.exports = {
   postMessage,
   updateMessage,
   getAllMessagesByUserId,
   deleteMessage,
+  getMessagesFromChannel,
 };
