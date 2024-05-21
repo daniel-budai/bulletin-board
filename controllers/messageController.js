@@ -1,4 +1,5 @@
 const sqlite3 = require("sqlite3").verbose();
+const { format } = require("date-fns");
 const db = new sqlite3.Database("./database.db");
 
 const postMessage = (req, res) => {
@@ -18,19 +19,23 @@ const postMessage = (req, res) => {
       });
     }
 
-    const sql = `INSERT INTO message (userId, channelId, Title) VALUES (?, ?, ?)`;
-    db.run(sql, [userId, channelId, message], function (err) {
-      if (err) {
-        return console.error(err.message);
-      }
-      const sql = `INSERT INTO message_channel (messageId, channelId) VALUES (?, ?)`;
-      db.run(sql, [this.lastID, channelId], function (err) {
+    const sql = `INSERT INTO message (userId, channelId, Title, createdAt) VALUES (?, ?, ?, ?)`;
+    db.run(
+      sql,
+      [userId, channelId, message, format(new Date(), "yyyy-MM-dd-HH:mm:ss")],
+      function (err) {
         if (err) {
           return console.error(err.message);
         }
-        res.status(200).json({ message: "Meddelandet har postats." });
-      });
-    });
+        const sql = `INSERT INTO message_channel (messageId, channelId) VALUES (?, ?)`;
+        db.run(sql, [this.lastID, channelId], function (err) {
+          if (err) {
+            return console.error(err.message);
+          }
+          res.status(200).json({ message: "Meddelandet har postats." });
+        });
+      }
+    );
   });
 };
 
@@ -72,7 +77,7 @@ const deleteMessage = (req, res) => {
 
 const getMessagesFromChannel = (req, res) => {
   const { channelId } = req.params;
-  const sql = `SELECT * FROM message INNER JOIN message_channel ON message.MessageId = message_channel.messageId WHERE message_channel.channelId = ?`;
+  const sql = `SELECT * FROM message INNER JOIN message_channel ON message.MessageId = message_channel.messageId WHERE message_channel.channelId = ? ORDER BY createdAt DESC`;
   db.all(sql, [channelId], (err, rows) => {
     if (err) {
       return console.error(err.message);
