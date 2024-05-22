@@ -1,5 +1,4 @@
 const { format } = require("date-fns");
-
 const db = require("../database/database");
 
 const postMessage = (req, res) => {
@@ -42,7 +41,7 @@ const postMessage = (req, res) => {
 const updateMessage = (req, res) => {
   const { messageId, newMessage } = req.body;
 
-  const sql = `UPDATE message SET message = ? WHERE MessageId = ?`;
+  const sql = `UPDATE message SET Title = ? WHERE MessageId = ?`;
   db.run(sql, [newMessage, messageId], function (err) {
     if (err) {
       return console.error(err.message);
