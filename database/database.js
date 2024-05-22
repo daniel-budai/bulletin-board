@@ -7,48 +7,22 @@ const messageChannelTable = require("../database/sqlScripts/messageChannelTable"
 const sqlite3 = require("sqlite3").verbose();
 
 const initDatabase = () => {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database("./database.db", (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-
-    db.run(usersTable, (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-    db.run(channelsTable, (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-    db.run(messagesTable, (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-    db.run(subscriptionTable, (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-    db.run(messageChannelTable, (err) => {
-      if (err) {
-        console.error(err.message);
-        reject(err);
-      }
-    });
-
-    resolve();
+  const db = new sqlite3.Database("./database.db", (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log("Connected to the SQLite database.");
   });
-};
-initDatabase();
 
-module.exports = { initDatabase };
+  db.serialize(() => {
+    db.run(usersTable);
+    db.run(channelsTable);
+    db.run(messagesTable);
+    db.run(subscriptionTable);
+    db.run(messageChannelTable);
+  });
+
+  return db;
+};
+
+module.exports = initDatabase();

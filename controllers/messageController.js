@@ -1,6 +1,6 @@
-const sqlite3 = require("sqlite3").verbose();
 const { format } = require("date-fns");
-const db = new sqlite3.Database("./database.db");
+
+const db = require("../database/database");
 
 const postMessage = (req, res) => {
   const { userId, channelId, message } = req.body;

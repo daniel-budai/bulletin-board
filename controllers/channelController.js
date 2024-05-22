@@ -1,5 +1,4 @@
-const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("./database.db");
+const db = require("../database/database");
 
 const createChannel = (req, res) => {
   const { channel_name, ownerId } = req.body;
